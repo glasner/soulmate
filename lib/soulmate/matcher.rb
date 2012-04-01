@@ -16,11 +16,11 @@ module Soulmate
       
       puts 'Past words.empty'
 
-      cachekey = "#{cachebase}:" + words.join('|')
+      cachekey = key "#{cachebase}:#{words.join('|')}", redis
 
       if !options[:cache] || !redis.exists(cachekey)
         puts "Writing to cache"
-        interkeys = words.map { |word| interkey_for word, redis  }
+        interkeys = words.map { |word| key "#{base}:#{word}", redis  }
         puts interkeys
         redis.zinterstore(cachekey, interkeys)
         redis.expire(cachekey, 10 * 60) # expire after 10 minutes
@@ -37,10 +37,11 @@ module Soulmate
       end
     end
     
-    def interkey_for(word,redis)
-      key = "#{base}:#{word}"
-      return key unless redis.respond_to? :namespace
-      "#{redis.namespace}:#{key}"
+    def key(without_namespace, redis)
+      return without_namespace unless redis.respond_to? :namespace
+      "#{redis.namespace}:#{without_namespace}"
     end
+    
+
   end
 end 
