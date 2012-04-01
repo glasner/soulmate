@@ -2,8 +2,7 @@ module Soulmate
 
   class Loader < Base
 
-    def load(items,opts={})
-      redis = opts.delete(:redis) || Soulmate.redis
+    def load(items)
       # delete the sorted sets for this type
       phrases = redis.smembers(base)
       redis.pipelined do
@@ -28,7 +27,6 @@ module Soulmate
 
     # "id", "term", "score", "aliases", "data"
     def add(item, opts = {})
-      redis = opts.delete(:redis) || Soulmate.redis
       opts = { :skip_duplicate_check => false }.merge(opts)
       raise ArgumentError unless item["id"] && item["term"]
       
@@ -47,8 +45,7 @@ module Soulmate
     end
 
     # remove only cares about an item's id, but for consistency takes an object
-    def remove(item,opts={})
-      redis = opts.delete(:redis) || Soulmate.redis
+    def remove(item)
       prev_item = redis.hget(database, item["id"])
       if prev_item
         prev_item = MultiJson.decode(prev_item)

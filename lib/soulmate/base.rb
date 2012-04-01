@@ -4,10 +4,11 @@ module Soulmate
     
     include Helpers
     
-    attr_accessor :type
+    attr_accessor :type,:redis
     
-    def initialize(type)
+    def initialize(type,opt={})
       @type = normalize(type)
+      @redis = opt[:redis] || Soulmate.redis
     end
     
     def base

@@ -3,7 +3,6 @@ module Soulmate
   class Matcher < Base
 
     def matches_for_term(term, options = {})
-      redis = options.delete(:redis) || Soulmate.redis
       options = { :limit => 5, :cache => true }.merge(options)
       
       words = normalize(term).split(' ').reject do |w|
@@ -27,13 +26,13 @@ module Soulmate
     
     # zinterstore command doesn't work with Redis::Namespace
     # so we have to manually namespace the keys for this call only
-    def cache(key,words,redis)
+    def cache(key,words)
       interkeys = words.map { |word| namespaced("#{base}:#{word}", redis)  }
       redis.zinterstore(namespaced(key,redis), interkeys)
       redis.expire(key, 10 * 60) # expire after 10 minutes
     end
     
-    def namespaced(key, redis)
+    def namespaced(key)
       return key unless redis.respond_to? :namespace
       "#{redis.namespace}:#{key}"
     end
