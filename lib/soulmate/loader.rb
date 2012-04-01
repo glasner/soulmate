@@ -47,7 +47,7 @@ module Soulmate
     end
 
     # remove only cares about an item's id, but for consistency takes an object
-    def remove(item,opt={})
+    def remove(item,opts={})
       redis = opts.delete(:redis) || Soulmate.redis
       prev_item = redis.hget(database, item["id"])
       if prev_item
