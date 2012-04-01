@@ -20,7 +20,7 @@ module Soulmate
 
       if !options[:cache] || !redis.exists(cachekey)
         puts "Writing to cache"
-        interkeys = words.map { |w| "#{base}:#{w}" }
+        interkeys = words.map { |w| interkey_for word, redis  }
         puts interkeys
         redis.zinterstore(cachekey, interkeys)
         redis.expire(cachekey, 10 * 60) # expire after 10 minutes
@@ -35,6 +35,12 @@ module Soulmate
         puts "no ids found #{ids.inspect}"
         []
       end
+    end
+    
+    def interkey_for(word,redis)
+      key = "#{base}:#{word}"
+      return key unless redis.respond_to? :namespace
+      "#{redis.namespace}:#{key}"
     end
   end
 end 
