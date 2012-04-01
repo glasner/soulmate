@@ -16,13 +16,13 @@ module Soulmate
       
       puts 'Past words.empty'
 
-      cachekey = key "#{cachebase}:#{words.join('|')}", redis
+      cachekey = "#{cachebase}:#{words.join('|')}"
 
       if !options[:cache] || !redis.exists(cachekey)
         puts "Writing to cache"
         interkeys = words.map { |word| key "#{base}:#{word}", redis  }
         puts interkeys
-        redis.zinterstore(cachekey, interkeys)
+        redis.zinterstore(key(cachekey,redis), interkeys)
         redis.expire(cachekey, 10 * 60) # expire after 10 minutes
       end
 
