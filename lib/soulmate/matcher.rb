@@ -3,6 +3,7 @@ module Soulmate
   class Matcher < Base
 
     def matches_for_term(term, options = {})
+      redis = options.delete(:redis) || redis
       options = { :limit => 5, :cache => true }.merge(options)
       
       words = normalize(term).split(' ').reject do |w|
@@ -13,15 +14,15 @@ module Soulmate
 
       cachekey = "#{cachebase}:" + words.join('|')
 
-      if !options[:cache] || !Soulmate.redis.exists(cachekey)
+      if !options[:cache] || !redis.exists(cachekey)
         interkeys = words.map { |w| "#{base}:#{w}" }
-        Soulmate.redis.zinterstore(cachekey, interkeys)
-        Soulmate.redis.expire(cachekey, 10 * 60) # expire after 10 minutes
+        redis.zinterstore(cachekey, interkeys)
+        redis.expire(cachekey, 10 * 60) # expire after 10 minutes
       end
 
-      ids = Soulmate.redis.zrevrange(cachekey, 0, options[:limit] - 1)
+      ids = redis.zrevrange(cachekey, 0, options[:limit] - 1)
       if ids.size > 0
-        results = Soulmate.redis.hmget(database, *ids)
+        results = redis.hmget(database, *ids)
         results = results.reject{ |r| r.nil? } # handle cached results for ids which have since been deleted
         results.map { |r| MultiJson.decode(r) }
       else
