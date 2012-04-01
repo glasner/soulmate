@@ -21,7 +21,7 @@ module Soulmate
       if !options[:cache] || !redis.exists(cachekey)
         puts "Writing to cache"
         interkeys = words.map { |w| "#{base}:#{w}" }
-        puts interKeys
+        puts interkeys
         redis.zinterstore(cachekey, interkeys)
         redis.expire(cachekey, 10 * 60) # expire after 10 minutes
       end
