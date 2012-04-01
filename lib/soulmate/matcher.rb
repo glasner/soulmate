@@ -3,7 +3,7 @@ module Soulmate
   class Matcher < Base
 
     def matches_for_term(term, options = {})
-      redis = options.delete(:redis) || redis
+      redis = options.delete(:redis) || Soulmate.redis
       options = { :limit => 5, :cache => true }.merge(options)
       
       words = normalize(term).split(' ').reject do |w|
