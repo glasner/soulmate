@@ -13,7 +13,7 @@ module Soulmate
 
       cachekey = "#{cachebase}:#{words.join('|')}"
 
-      cache(cachekey, words, redis) if !options[:cache] || !redis.exists(cachekey)
+      cache(cachekey, words) if !options[:cache] || !redis.exists(cachekey)
       
       ids = redis.zrevrange(cachekey, 0, options[:limit] - 1)
       return [] if ids.empty?
@@ -27,8 +27,8 @@ module Soulmate
     # zinterstore command doesn't work with Redis::Namespace
     # so we have to manually namespace the keys for this call only
     def cache(key,words)
-      interkeys = words.map { |word| namespaced("#{base}:#{word}", redis)  }
-      redis.zinterstore(namespaced(key,redis), interkeys)
+      interkeys = words.map { |word| namespaced("#{base}:#{word}")  }
+      redis.zinterstore(namespaced(key), interkeys)
       redis.expire(key, 10 * 60) # expire after 10 minutes
     end
     
