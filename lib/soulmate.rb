@@ -19,7 +19,7 @@ module Soulmate
     return @redis = connection if connection.is_a? Redis
     @redis = nil
     @redis_url = connection
-    redis
+    d
   end
 
   def redis
@@ -41,6 +41,28 @@ module Soulmate
 
   def stop_words=(arr)
     @stop_words = Array(arr).flatten
+  end
+  
+  ## Shortcut Methods
+  
+  def loader
+    @loader ||= Loader.new
+  end
+  
+  def add(item,opt={})
+    loader.add item,opt
+  end
+  
+  def remove(item)
+    loader.remove item
+  end
+  
+  def matcher
+    @matcher ||= Matcher.new
+  end
+  
+  def matches_for_term(term,opt={})
+    matcher.matches_for_term term,opt
   end
 
 end
